@@ -1,14 +1,11 @@
-package main
+package bank
 
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
-	"time"
 )
 
 const MONO_API_URL = "https://api.monobank.ua/personal"
@@ -95,7 +92,7 @@ func makeRequest(method string, objectToUnmarshal any, urlElem ...string) error 
 	return nil
 }
 
-func getClientInfo() (*MonoClient, error) {
+func GetClientInfo() (*MonoClient, error) {
 	client := MonoClient{}
 	if err := makeRequest("GET", &client, "client-info"); err != nil {
 		return nil, err
@@ -103,30 +100,10 @@ func getClientInfo() (*MonoClient, error) {
 	return &client, nil
 }
 
-func getStatement(account, from, to string) ([]Statement, error) {
+func GetStatement(account, from, to string) ([]Statement, error) {
 	var stat []Statement
 	if err := makeRequest("GET", &stat, "statement", account, from, to); err != nil {
 		return nil, err
 	}
 	return stat, nil
-}
-
-func main() {
-	var client *MonoClient
-	client, err := getClientInfo()
-	if err != nil {
-		log.Fatalf("Cannot get client info: %s\n", err)
-	}
-	log.Printf("Got client data: %v\n", *client)
-
-	var statements []Statement
-	from := time.Date(2023, time.March, 1, 0, 0, 0, 0, time.UTC)
-	to := time.Date(2023, time.March, 10, 0, 0, 0, 0, time.UTC)
-	log.Printf("from: %v to: %v", from, to)
-
-	statements, err = getStatement(os.Getenv("MONO_ACCOUNT_ID"), strconv.FormatInt(from.Unix(), 10), strconv.FormatInt(to.Unix(), 10))
-	if err != nil {
-		log.Fatalf("Cannot get statement")
-	}
-	log.Printf("Got statement: %v\n", statements)
 }
