@@ -2,8 +2,6 @@ module github.com/volekkkkk/wheresmymoney
 
 go 1.21
 
-toolchain go1.21.6
-
 require github.com/mymmrac/telego v0.28.0
 
 require (
