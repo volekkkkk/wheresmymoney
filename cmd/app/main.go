@@ -9,9 +9,27 @@ import (
 
 	"github.com/mymmrac/telego"
 	"github.com/volekkkkk/wheresmymoney/internal/bank"
+	"github.com/volekkkkk/wheresmymoney/internal/environment"
 )
 
+func initEnv(envFileName string) error {
+	err := environment.LoadEnv(envFileName)
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Printf("Warning: %s file not found. Using default environment variables.\n", envFileName)
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
 func main() {
+	err := initEnv(".env")
+	if err != nil {
+		log.Fatalf("Fail to init env variables: %s\n", err)
+	}
+
 	var client *bank.MonoClient
 	telegramBot, err := telego.NewBot(os.Getenv("TELEGRAM_BOT_TOKEN"))
 	if err != nil {
