@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -30,7 +31,6 @@ func main() {
 		log.Fatalf("Fail to init env variables: %s\n", err)
 	}
 
-	var client *bank.MonoClient
 	telegramBot, err := telego.NewBot(os.Getenv("TELEGRAM_BOT_TOKEN"))
 	if err != nil {
 		log.Fatalf("Fail initialize Telegram Bot: %s\n", err)
@@ -41,23 +41,26 @@ func main() {
 		fmt.Println("Error:", err)
 	}
 
-	// Print Bot information
 	fmt.Printf("Bot user: %+v\n", botUser)
 
-	client, err = bank.GetClientInfo()
+	client, err := bank.GetClientInfo()
 	if err != nil {
 		log.Fatalf("Cannot get client info: %s\n", err)
 	}
 	log.Printf("Got client data: %v\n", *client)
 
 	var statements []bank.Statement
-	from := time.Date(2023, time.December, 1, 0, 0, 0, 0, time.UTC)
-	to := time.Date(2023, time.December, 31, 0, 0, 0, 0, time.UTC)
+	from := time.Date(2024, time.December, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Now().UTC()
+	to = time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
 	log.Printf("from: %v to: %v", from, to)
 
 	statements, err = bank.GetStatement(os.Getenv("MONO_ACCOUNT_ID"), strconv.FormatInt(from.Unix(), 10), strconv.FormatInt(to.Unix(), 10))
 	if err != nil {
 		log.Fatalf("Cannot get statement")
 	}
-	log.Printf("Got statement: %v\n", statements)
+	// log.Printf("Got statement: %v\n", statements)
+
+	statements_pretty, err := json.MarshalIndent(statements, "", "    ")
+	log.Printf(string(statements_pretty))
 }
